@@ -68,6 +68,10 @@ com o docker instalado siga os próximos passos abaixo.
    git clone https://github.com/brunoribeiro-lab/api-cep.git
    ```
 2. Copie o .env.example para .env e abra o arquivo `.env` e substitua pelas informações corretas:
+   ```sh
+   cp .env.example .env
+   ```
+   Defina as configurações no arquivo .env
    ```js
     DB_HOST=127.0.0.1               // IP do banco de dados
     DB_PORT=3336                    // porta do banco de dados
@@ -89,7 +93,7 @@ com o docker instalado siga os próximos passos abaixo.
    docker-compose run --rm composer update
    ```
 
-5. Gerando um a chave do Laravel
+5. Gerando uma chave do Laravel
    ```sh
    docker-compose run artisan key:generate
    ```

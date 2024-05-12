@@ -12,6 +12,9 @@ class EnderecoController extends Controller {
             return response()->json(['error' => 'CEP não fornecido'], 400);
 
         $cepNumeros = preg_replace('/[^0-9]/', '', trim($cep));
+        if (strlen($cepNumeros !== 8))
+            return response()->json(['error' => 'CEP informado não é válido'], 400);
+
         $endereco = Endereco::select('enderecos.*', 'cidade.cidade', 'estado.uf', 'estado.estado', 'estado.regiao')
                 ->join('cidade', 'enderecos.cidade', '=', 'cidade.id')
                 ->join('estado', 'cidade.uf', '=', 'estado.uf')
@@ -19,7 +22,7 @@ class EnderecoController extends Controller {
                 ->first();
 
         if (!$endereco)
-            return response()->json(['error' => sprintf('Endereço não encontrado para o CEP fornecido %s',$cepNumeros)], 404);
+            return response()->json(['error' => sprintf('Endereço não encontrado para o CEP fornecido %s', $cepNumeros)], 404);
 
         return response()->json($endereco);
     }
