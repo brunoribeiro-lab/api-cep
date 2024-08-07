@@ -48,6 +48,38 @@ Exemplo de resposta:
     }
    ```
 
+
+## Buscar Cidades
+
+`GET /cidades/{uf}`
+
+Resposta:
+
+`200 OK`: Retorna um objeto JSON contendo uma lista de todas as cidades correspondente ao UF fornecido.
+
+
+Exemplo de resposta:
+   ```js
+   [
+      {
+         "cidade": "Arapiraca"
+      },
+      {
+         "cidade": "Maceió"
+      },
+      {
+         "cidade": "Palmeira dos Índios"
+      }
+   ]
+   ```
+`404 Not Found`: Se nenhuma cidade for encontrado para o UF fornecido.
+Exemplo de resposta:
+   ```js
+    {
+        "error":"Nenhuma Cidade foi encontrada com o UF fornecido: BU"}
+    }
+   ```
+
 ## Começando
 
 Veja abaixo todos os passos para fazer a instalação corretamente da aplicação.
