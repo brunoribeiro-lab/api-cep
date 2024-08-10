@@ -35,7 +35,7 @@ class EnderecoController extends Controller {
         if (strlen($uf) !== 2)
             return response()->json(['error' => 'UF informado não é válido'], 400);
 
-       $cidades = Cidade::where("uf", strtoupper($uf))->get();
+       $cidades = Cidade::where("uf", strtoupper($uf))->orderBy("cidade")->get();
        if (!$cidades->count())
             return response()->json(['error' => sprintf('Nenhuma Cidade foi encontrada com o UF fornecido: %s', $uf)], 404);
 
