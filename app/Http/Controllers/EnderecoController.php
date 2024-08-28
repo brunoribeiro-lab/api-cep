@@ -22,7 +22,7 @@ class EnderecoController extends Controller {
                 ->where('enderecos.cep', $cepNumeros)
                 ->first();
 
-        if (!$endereco->count())
+        if (is_null($endereco)) 
             return response()->json(['error' => sprintf('Nenhum Endereço foi encontrado com o CEP fornecido: %s', $cepNumeros)], 404);
 
         return response()->json($endereco);
@@ -36,7 +36,7 @@ class EnderecoController extends Controller {
             return response()->json(['error' => 'UF informado não é válido'], 400);
 
        $cidades = Cidade::where("uf", strtoupper($uf))->orderBy("cidade")->get();
-       if (!$cidades->count())
+       if (is_null($cidades)) 
             return response()->json(['error' => sprintf('Nenhuma Cidade foi encontrada com o UF fornecido: %s', $uf)], 404);
 
         return response()->json($cidades);
