@@ -8,5 +8,5 @@ class Cidade extends Model {
 
     protected $table = 'cidade';
 
-    protected $hidden = ['id', 'uf'];
+    protected $hidden = ['id'];
 }

@@ -80,6 +80,54 @@ Exemplo de resposta:
     }
    ```
 
+## Buscar Cidade
+
+`GET /cidade/{cidade}/{uf?}`
+
+Resposta:
+
+`200 OK`: Retorna um objeto JSON contendo uma lista de todas as cidades.
+
+
+Exemplo de resposta sem UF:
+   ```js
+   [
+      {
+         "cidade": "São Paulo",
+         "uf": "SP"
+      },
+      {
+         "cidade": "São Paulo",
+         "uf": "RS"
+      }
+   ]
+   ```
+
+Exemplo de resposta com UF:
+   ```js
+      {
+         "cidade": "São Paulo",
+         "uf": "SP"
+      }
+   ```
+
+`404 Not Found`: Se nenhuma cidade for encontrada.
+
+Exemplo de resposta sem UF:
+   ```js
+    {
+        "error":'Nenhuma cidade encontrada com o nome "São Paulos".'}
+    }
+   ```
+
+Exemplo de resposta com UF:
+
+   ```js
+    {
+        "error":'Nenhuma cidade encontrada com o nome "São Paulos" e UF "RJ".'}
+    }
+   ```
+
 ## Começando
 
 Veja abaixo todos os passos para fazer a instalação corretamente da aplicação.
