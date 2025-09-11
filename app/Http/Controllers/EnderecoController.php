@@ -2,37 +2,39 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CidadeUFRequest;
 use App\Http\Requests\ConsultarEnderecoRequest;
 use App\Models\Endereco;
 use App\Models\Cidade;
+use Illuminate\Http\JsonResponse;
 
 class EnderecoController extends Controller
 {
-
-    public function consultarEndereco(ConsultarEnderecoRequest $request)
+    /**
+     * Consulta um endereço pelo CEP fornecido.
+     * 
+     * @access public
+     * @param \App\Http\Requests\ConsultarEnderecoRequest $request
+     * @return JsonResponse
+     */
+    public function consultarEndereco(ConsultarEnderecoRequest $request): JsonResponse
     {
         $cepNumeros = $request->validated()['cep'];
-        $endereco = Endereco::select('enderecos.*', 'cidade.cidade', 'estado.uf', 'estado.estado', 'estado.regiao')
-            ->join('cidade', 'enderecos.cidade', '=', 'cidade.id')
-            ->join('estado', 'cidade.uf', '=', 'estado.uf')
-            ->where('enderecos.cep', $cepNumeros)
+
+        $endereco = Endereco::withCidadeEstado()
+            ->cep($cepNumeros)
             ->first();
 
-        if (is_null($endereco))
+        if (!$endereco)
             return response()->json(['error' => sprintf('Nenhum Endereço foi encontrado com o CEP fornecido: %s', $cepNumeros)], 404);
 
         return response()->json($endereco);
     }
 
-    public function cidadesUF($uf)
+    public function cidadesUF(CidadeUFRequest $request): JsonResponse
     {
-        if (!$uf)
-            return response()->json(['error' => 'UF não fornecido'], 400);
-
-        if (strlen($uf) !== 2)
-            return response()->json(['error' => 'UF informado não é válido'], 400);
-
-        $cidades = Cidade::where("uf", strtoupper($uf))->orderBy("cidade")->get();
+        $uf = $request->validated()['uf'];
+        $cidades = Cidade::byUF($uf)->get();
 
         if (!count($cidades->toArray()))
             return response()->json(['error' => sprintf('Nenhuma Cidade foi encontrada com o UF fornecido: %s', $uf)], 404);
