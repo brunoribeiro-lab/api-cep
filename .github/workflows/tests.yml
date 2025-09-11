@@ -1,0 +1,78 @@
+name: Test API CEP
+
+on:
+  pull_request:
+    branches:
+      - '*'
+  push:
+    branches:
+      - '*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testing_db
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 3306:3306
+
+    steps:
+    - name: Checkout main code
+      uses: actions/checkout@v2
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      env:
+        runner: self-hosted
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, bcmath, curl, gd, mysql, mysqli, zip
+        
+    - name: Set permissions
+      run: |
+        cp .env.example .env
+        chmod -R 777 storage/
+        chmod -R 777 bootstrap/cache/
+
+    - name: Install Composer dependencies
+      run: |
+        composer install --prefer-dist --no-interaction --no-scripts
+        
+    - name: Set up .env file with database credentials
+      run: |
+        sed -i "s/^APP_KEY=.*/APP_KEY=$(php artisan key:generate --show)/" .env || echo "APP_KEY=$(php artisan key:generate --show)" >> .env
+        sed -i "s/^DB_CONNECTION=.*/DB_CONNECTION=mysql/" .env || echo "DB_CONNECTION=mysql" >> .env
+        sed -i "s/^DB_HOST=.*/DB_HOST=127.0.0.1/" .env || echo "DB_HOST=127.0.0.1" >> .env
+        sed -i "s/^DB_PORT=.*/DB_PORT=3306/" .env || echo "DB_PORT=3306" >> .env
+        sed -i "s/^DB_DATABASE=.*/DB_DATABASE=testing_db/" .env || echo "DB_DATABASE=testing_db" >> .env
+        sed -i "s/^DB_USERNAME=.*/DB_USERNAME=root/" .env || echo "DB_USERNAME=root" >> .env
+        sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=root/" .env || echo "DB_PASSWORD=root" >> .env
+
+    - name: Wait for MySQL to be ready
+      run: |
+        until mysqladmin ping -h 127.0.0.1 --silent; do
+          echo "Waiting for MySQL..."
+          sleep 5
+        done
+
+    - name: Run Migrations
+      run: |
+        php artisan migrate --force --verbose
+
+    - name: Run Seeders
+      run: |
+        php artisan db:seed --force --verbose
+
+    - name: Run Tests
+      run: |
+        php artisan test
