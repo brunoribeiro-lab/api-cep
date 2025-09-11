@@ -160,12 +160,10 @@ com o docker instalado siga os próximos passos abaixo.
     DB_PASSWORD=senha_do_banco      // senha do banco de dados
     APP_URL=http://localhost:8000   // url da aplicação + porta (caso seja diferente de 80 não precisa informar a porta)
     APP_PORT=8080                   // porta da aplicação   ex: 8080
-    APP_PHP_PORT=9002               // porta do PHP         ex: 80
-    APP_REDIS_PORT=6378             // porta do redis       ex: 6378
    ```
 3. Executando o Docker Composer
    ```sh
-   docker-compose up -d --build app
+   docker-compose up -d --build start
    ```
 
 4. Instalando as bibliotecas
@@ -175,7 +173,7 @@ com o docker instalado siga os próximos passos abaixo.
 
 5. Gerando uma chave do Laravel
    ```sh
-   docker-compose run artisan key:generate
+   docker-compose run -rm artisan key:generate
    ```
 
 6. Importando as tabelas
@@ -185,12 +183,10 @@ com o docker instalado siga os próximos passos abaixo.
 
 7. Importando os dados do endereço
    ```sh
-   docker-compose run artisan db:seed --class=ImportarDadosSeeder
+   docker-compose run --rm artisan db:seed
    ```
 
 Portas expostas detalhadas para o .env de exemplo
  
 - **nginx** - `:8080`
 - **mysql** - `:3336`
-- **php** - `:9002`  
-- **redis** - `:6378`  
