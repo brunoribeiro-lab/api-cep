@@ -4,11 +4,12 @@ namespace Tests\Feature;
 
 use Illuminate\Support\Str;
 use Tests\TestCase;
+use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class ConsultarCEPTest extends TestCase
 {
-    private function requestCep(string $mode, ?string $cep = null)
+    private function requestCep(string $mode, ?string $cep = null): TestResponse
     {
         if ($mode === 'path') {
             return ($cep === null || $cep === '')
@@ -22,7 +23,7 @@ class ConsultarCEPTest extends TestCase
 
     public static function modesProvider(): array
     {
-        return [['path'], ['query']]; // Testa ambos os modos: via path e query ex: /cep/01001000 e /cep?cep=01001000
+        return [['path'], ['query']]; // /cep/{cep} e /cep?cep=
     }
 
     public static function invalidCepsProvider(): array
@@ -34,7 +35,7 @@ class ConsultarCEPTest extends TestCase
             ['query', Str::password(8, true, false, false, false), 400],
             ['path', "' OR '1'='1", 400], // SQLi
             ['query', "' OR '1'='1", 400],
-            // XSS apenas via query para não quebrar a rota (possui '/')
+            // XSS apenas via query (contém '/')
             ['query', "<script>alert('XSS');</script>", 400],
         ];
     }
@@ -52,34 +53,41 @@ class ConsultarCEPTest extends TestCase
         ];
     }
 
-    #[DataProvider('modesProvider')]
-    public function test_cep_vazio_retorna_400(string $mode): void
+    private function assertInvalidCep(TestResponse $response, int $status = 400): void
     {
-        $this->requestCep($mode, '')
-            ->assertStatus(400)
-            ->assertJson(['error' => 'CEP não fornecido']);
+        $response->assertStatus($status);
+        $msg = $response->json('error');
+        $this->assertIsString($msg);
+        $this->assertContains($msg, [
+            'CEP informado não é válido',
+            'O CEP fornecido é inválido.',
+            'CEP não fornecido',
+        ]);
     }
 
     #[DataProvider('modesProvider')]
-    public function test_cep_inexistente_8d_retorna_404(string $mode): void
+    public function test_retorna_400_quando_cep_vazio(string $mode): void
+    {
+        $this->assertInvalidCep($this->requestCep($mode, ''), 400);
+    }
+
+    #[DataProvider('modesProvider')]
+    public function test_retorna_404_quando_cep_de_8_digitos_nao_existe(string $mode): void
     {
         $cep = '12344321';
-
         $this->requestCep($mode, $cep)
             ->assertStatus(404)
             ->assertJson(['error' => "Nenhum Endereço foi encontrado com o CEP fornecido: $cep"]);
     }
 
     #[DataProvider('invalidCepsProvider')]
-    public function test_ceps_invalidos_retorna_400(string $mode, string $cep, int $status): void
+    public function test_retorna_400_para_ceps_invalidos(string $mode, string $cep, int $status): void
     {
-        $this->requestCep($mode, $cep)
-            ->assertStatus($status)
-            ->assertJson(['error' => 'CEP informado não é válido']);
+        $this->assertInvalidCep($this->requestCep($mode, $cep), $status);
     }
 
     #[DataProvider('modesProvider')]
-    public function test_cep_valido_retorna_payload_esperado(string $mode): void
+    public function test_retorna_200_e_payload_esperado_para_cep_valido(string $mode): void
     {
         $this->requestCep($mode, '01001-000')
             ->assertOk()

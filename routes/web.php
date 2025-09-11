@@ -9,6 +9,6 @@ Route::get('/', function () {
 });
 
 // Endpoints da API
-Route::get('/cep/{cep}', [EnderecoController::class, 'consultarEndereco']);
+Route::get('/cep/{cep?}', [EnderecoController::class, 'consultarEndereco'])->name('consultarEndereco');
 Route::get('/cidades/{uf}', [EnderecoController::class, 'cidadesUF']);
 Route::get('/cidade/{city}/{uf?}', [EnderecoController::class, 'cidadeUF']);

@@ -2,22 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ConsultarEnderecoRequest;
 use App\Models\Endereco;
 use App\Models\Cidade;
-use Illuminate\Http\Request;
 
 class EnderecoController extends Controller
 {
 
-    public function consultarEndereco(Request $request, $cep)
+    public function consultarEndereco(ConsultarEnderecoRequest $request)
     {
-        if (!$cep)
-            return response()->json(['error' => 'CEP não fornecido'], 400);
-
-        $cepNumeros = preg_replace('/[^0-9]/', '', trim($cep));
-        if (strlen($cepNumeros) !== 8)
-            return response()->json(['error' => 'CEP informado não é válido'], 400);
-
+        $cepNumeros = $request->validated()['cep'];
         $endereco = Endereco::select('enderecos.*', 'cidade.cidade', 'estado.uf', 'estado.estado', 'estado.regiao')
             ->join('cidade', 'enderecos.cidade', '=', 'cidade.id')
             ->join('estado', 'cidade.uf', '=', 'estado.uf')
