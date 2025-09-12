@@ -6,6 +6,7 @@ use App\Http\Requests\ConsultarCidadeRequest;
 use App\Models\Cidade;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 
 class CidadeController extends Controller
 {
@@ -25,14 +26,17 @@ class CidadeController extends Controller
             $city = $data['city'];
             $uf = $data['uf'] ?? null;
 
-            $query = Cidade::ByCidade($city, $uf);
-            $cidades = $uf ? $query->firstOrFail() : $query->get();
+            $cacheKey = "cidade:city:{$city}" . ($uf ? "uf:{$uf}" : '');
+            $cidades = Cache::remember($cacheKey, now()->addHour(), function () use ($city, $uf): array {
+                $query = Cidade::ByCidade($city, $uf);
+                return $uf ? $query->firstOrFail()->toArray() : $query->get()->toArray();
+            }); 
 
-            if (!$uf && $cidades->isEmpty())
+            if (!$uf && empty($cidades))
                 throw new ModelNotFoundException();
 
             return response()->json($cidades);
-            
+
         } catch (ModelNotFoundException $e) {
             $mensagemErro = $uf
                 ? sprintf('Nenhuma cidade encontrada com o nome "%s" e UF "%s".', $city, strtoupper($uf))

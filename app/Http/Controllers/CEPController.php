@@ -6,6 +6,7 @@ use App\Http\Requests\ConsultarEnderecoRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\Endereco;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 use Exception;
 
 class CEPController extends Controller
@@ -22,9 +23,14 @@ class CEPController extends Controller
     {
         try {
             $cepNumeros = $request->validated()['cep'];
-            $endereco = Endereco::withCidadeEstado()
-                ->cep($cepNumeros)
-                ->firstOrFail();
+
+            $cacheKey = "endereco:cep:{$cepNumeros}";
+            $endereco = Cache::remember($cacheKey, now()->addHour(), function () use ($cepNumeros): array {
+                return Endereco::withCidadeEstado()
+                    ->cep($cepNumeros)
+                    ->firstOrFail()
+                    ->toArray(); // armazena como array no cache
+            });
 
             return response()->json($endereco);
         } catch (ModelNotFoundException $e) {

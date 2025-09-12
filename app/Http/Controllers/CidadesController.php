@@ -6,6 +6,7 @@ use App\Http\Requests\CidadeUFRequest;
 use App\Models\Cidade;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Cache;
 
 class CidadesController extends Controller
 {
@@ -21,13 +22,22 @@ class CidadesController extends Controller
     {
         try {
             $uf = $request->validated()['uf'];
-            $cidades = Cidade::byUF($uf)->get();
 
-            if ($cidades->isEmpty())
+            $cacheKey = "cidades:uf:{$uf}";
+            $cidades = Cache::remember($cacheKey, now()->addHour(), function () use ($uf): array {
+                return Cidade::query()
+                    ->select('cidade')
+                    ->byUF($uf)
+                    ->get()
+                    ->pluck('cidade')
+                    ->toArray();
+            });
+
+            if (empty($cidades))
                 throw new ModelNotFoundException("Nenhuma Cidade foi encontrada com o UF fornecido: $uf");
 
-            return response()->json($cidades->pluck('cidade'));
-            
+            return response()->json($cidades);
+
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => $e->getMessage()], 404);
         } catch (\Throwable $e) {
