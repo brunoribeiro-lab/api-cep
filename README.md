@@ -163,27 +163,31 @@ com o docker instalado siga os próximos passos abaixo.
    ```
 3. Executando o Docker Composer
    ```sh
-   docker-compose up -d --build start
+   docker compose up -d --build start
    ```
 
 4. Instalando as bibliotecas
    ```sh
-   docker-compose run --rm composer update
+   docker compose run --rm composer update
    ```
 
 5. Gerando uma chave do Laravel
    ```sh
-   docker-compose run -rm artisan key:generate
+   docker compose run -rm artisan key:generate
    ```
 
 6. Importando as tabelas
    ```sh
-   docker-compose run --rm artisan migrate
+   docker compose run --rm artisan migrate
    ```
 
 7. Importando os dados do endereço
    ```sh
-   docker-compose run --rm artisan db:seed
+   docker compose run --rm artisan db:seed
+   ```
+8. Rodar os testes
+   ```sh
+   docker compose run --rm artisan test
    ```
 
 Portas expostas detalhadas para o .env de exemplo
