@@ -11,7 +11,7 @@ A API de CEP disponibiliza uma API RESTful que permite consultar dados detalhado
 Abaixo está as tecnologias usadas no desenvolvimento desse projeto.
 
 * [Mysql](https://www.mysql.com/)
-* [Laravel](https://laravel.com/docs/11.x)
+* [Laravel 11](https://laravel.com/docs/11.x)
 
 ## Respostas
 
@@ -155,12 +155,15 @@ com o docker instalado siga os próximos passos abaixo.
    ```js
     DB_HOST=127.0.0.1               // IP do banco de dados
     DB_PORT=3336                    // porta do banco de dados
-    DB_DATABASE=minha_app           // nome do banco de dados
+    DB_DATABASE=api_cep             // nome do banco de dados
     DB_USERNAME=root                // nome de usuário do banco de dados
     DB_PASSWORD=senha_do_banco      // senha do banco de dados
     APP_URL=http://localhost:8000   // url da aplicação + porta (caso seja diferente de 80 não precisa informar a porta)
     APP_PORT=8080                   // porta da aplicação   ex: 8080
    ```
+
+   Caso você esteja usando o docker compose (que não é recomendado em produção), as credenciais do banco criada será a mesma do arquivo .env
+
 3. Executando o Docker Composer
    ```sh
    docker compose up -d --build start
